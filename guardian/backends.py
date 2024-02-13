@@ -75,6 +75,12 @@ class ObjectPermissionBackend:
         always returns ``False``.
         """
 
+        # IMPORTANT #
+        # RUCHIT CHANGED THIS BECAUSE OF THE CUSTOM USER MODEL
+        # As we are creating a tenant based application, along with UserPermissions table the user_obj passed will be of UserPermissions and not the User model
+        # The user model is actually stored in profile field of UserPermissions model
+        user_obj = user_obj.profile 
+
         # check if user_obj and object are supported
         support, user_obj = check_support(user_obj, obj)
         if not support:

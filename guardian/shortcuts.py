@@ -32,6 +32,7 @@ from guardian.exceptions import MixedContentTypeError, WrongAppError, MultipleId
 from guardian.utils import get_anonymous_user, get_group_obj_perms_model, get_identity, get_user_obj_perms_model
 GroupObjectPermission = get_group_obj_perms_model()
 UserObjectPermission = get_user_obj_perms_model()
+from django_tenants.utils import schema_context, get_public_schema_name
 
 
 def assign_perm(perm, user_or_group, obj=None):
@@ -512,8 +513,10 @@ def get_objects_for_user(user, perms, klass=None, use_groups=True, any_perm=Fals
             codename = perm
         codenames.add(codename)
         if app_label is not None:
-            new_ctype = ContentType.objects.get(app_label=app_label,
-                                                permission__codename=codename)
+            public_schema = get_public_schema_name()
+            with schema_context(public_schema):
+                new_ctype = ContentType.objects.get(app_label=app_label,
+                                                    permission__codename=codename)
             if ctype is not None and ctype != new_ctype:
                 raise MixedContentTypeError("ContentType was once computed "
                                             "to be %s and another one %s" % (ctype, new_ctype))
